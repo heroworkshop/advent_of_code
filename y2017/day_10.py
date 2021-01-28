@@ -45,16 +45,20 @@ def solution1(lines):
     values = CircularBuffer(256)
     p = 0
     step = 0
-    print(values.render(p))
+    # print(values.render(p))
     for n in lines:
         values.reverse(p, p + n - 1)
         p += step + n
         step += 1
-        print(values.render(p))
+        # print(values.render(p))
     return values.at(0) * values.at(1)
 
 
 def solution2(input_data):
+    return knot_hash(input_data)
+
+
+def knot_hash(input_data):
     lines = [ord(ch) for ch in input_data]
     lines.extend([17, 31, 73, 47, 23])
     values = CircularBuffer(256)
@@ -65,10 +69,10 @@ def solution2(input_data):
             values.reverse(p, p + n - 1)
             p += step + n
             step += 1
-            print(values.render(p))
+            # print(values.render(p))
 
-    hash = dense_hash(values)
-    return "".join([f"{c:02x}" for c in hash])
+    knot_hash_ints = dense_hash(values)
+    return "".join([f"{c:02x}" for c in knot_hash_ints])
 
 
 def dense_hash(values):

@@ -1,3 +1,16 @@
+# If you get this error:
+#     "Puzzle inputs differ by user.  Please log in to get your puzzle input."
+# Then you need to import the session cookie
+#
+# For getting session cookie see:
+# https://github.com/wimglenn/advent-of-code-wim/issues/1
+#
+# Login on AoC with github or whatever Open browser's developer console (e.g. right click --> Inspect) and navigate
+# to the Network tab GET any input page, say adventofcode.com/2016/day/1/input, and look in the request headers. It's
+# a long hex string. Export that to an environment variable AOC_SESSION. Or, if you prefer more persistence,
+# you can write it to a plain text file at ~/.config/aocd/token.
+#
+
 import io
 from collections import defaultdict, namedtuple
 
