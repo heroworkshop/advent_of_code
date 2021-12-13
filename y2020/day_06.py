@@ -25,7 +25,7 @@ def run():
 
 
 def count_unique(group):
-    answers = {answer for answer in group if answer not in " \n"}
+    answers = {answer for answer in group if answer.strip()}
     return len(answers)
 
 

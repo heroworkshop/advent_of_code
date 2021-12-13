@@ -1,6 +1,25 @@
 import unittest
 
-from aocd_tools import Grid, grid_from_lines
+from aocd_tools import Grid, grid_from_lines, int_tuples_from_lines, ints_from_lines
+
+
+class TestParsingFunctions(unittest.TestCase):
+    def test_int_tuples_from_lines(self):
+        lines = """
+        1, 2, 3
+        4, 5, 6
+        """
+        result = int_tuples_from_lines(lines, ",")
+        self.assertEqual([(1, 2, 3), (4, 5, 6)], result)
+
+    def test_ints_from_lines(self):
+        lines = """
+        1
+        4
+        3
+        """
+        result = ints_from_lines(lines)
+        self.assertEqual([1, 4, 3], result)
 
 
 class TestGrid(unittest.TestCase):
@@ -23,6 +42,8 @@ class TestGrid(unittest.TestCase):
         self.assertEqual(1, grid.linear_index((1, 0)))
         self.assertEqual(2, grid.linear_index((0, 1)))
         self.assertEqual(3, grid.linear_index((1, 1)))
+
+
 
 
 class TestGridFromLines(unittest.TestCase):
