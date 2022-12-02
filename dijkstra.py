@@ -6,7 +6,7 @@ class Move(NamedTuple):
     score: int
     step_count: int
     state: Any
-    # path: List[Any]
+    path: List[Any]
 
 
 class Step(NamedTuple):
@@ -18,16 +18,21 @@ class Dijkstra:
     def __init__(self, initial_state):
         self.visited = set()
         self.queue = []
-        self.add_move(0, initial_state)
         self.best = float("inf")
+        self.best_path = None
         self.pruned = 0  # removed because a shorter path has been found already
         self.duplicates = 0  # path ignored because node has already been visited
         self.iterations = 0
         self.report_rate = 1000  # print progress after this many iterations
+        self.store_path = False
+        self.add_move(0, initial_state, [])
 
-    def add_move(self, step_count, state):
+    def add_move(self, step_count: int, state: Any, current_path: List):
         self.visited.add(self.serialise(state))
-        heapq.heappush(self.queue, Move(step_count=step_count, score=self.score(state), state=state))
+        path = current_path[:]
+        if self.store_path:
+            path.append(state)
+        heapq.heappush(self.queue, Move(step_count=step_count, score=self.score(state), state=state, path=path))
 
     @staticmethod
     def serialise(state):
@@ -38,8 +43,7 @@ class Dijkstra:
         """Lower is better. 0 is winner"""
         return 0
 
-    @staticmethod
-    def valid_moves(state) -> List[Step]:
+    def valid_moves(self, state) -> List[Step]:
         raise NotImplementedError
 
     def search(self):
@@ -49,7 +53,7 @@ class Dijkstra:
 
             if move.score == 0:
                 self.best = min(self.best, move.step_count)
-                print(f"best={self.best}")
+                self.best_path = move.path
                 continue
             self.queue_new_moves(move)
             self.report()
@@ -70,4 +74,4 @@ class Dijkstra:
             if new_step_count >= self.best:
                 self.pruned += 1
                 continue
-            self.add_move(new_step_count, new_move_state)
+            self.add_move(new_step_count, new_move_state, move.path)
