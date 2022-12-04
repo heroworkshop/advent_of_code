@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from aocd_tools import load_input_data
 
 EXAMPLE = """vJrwpWtwJgWrhcsFMMfFFhFp

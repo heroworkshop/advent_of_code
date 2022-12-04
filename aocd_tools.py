@@ -2,15 +2,19 @@
 #     "Puzzle inputs differ by user.  Please log in to get your puzzle input."
 # Then you need to import the session cookie
 #
-# For getting session cookie see:
-# https://github.com/wimglenn/advent-of-code-wim/issues/1
-#
-# Login on AoC with google authentication or whatever Open browser's developer console (e.g. right click --> Inspect) and navigate
-# to the Network tab GET any input page, say adventofcode.com/2016/day/1/input, and look in the request headers. It's
-# a long hex string. For example click on "input" and look for the "cookie:" section and take the value after "session=".
-# Export that to an environment variable AOC_SESSION. Or, if you prefer more persistence,
-# you can write it to a plain text file at ~/.config/aocd/token.
-#
+from aocd import AocdError
+
+AOCD_COOKIE_HELP = """
+For getting session cookie see:
+https://github.com/wimglenn/advent-of-code-wim/issues/1
+
+Login on AoC with google authentication or whatever Open browser's developer console (e.g. right click --> Inspect) and navigate
+to the Network tab GET any input page, say adventofcode.com/2016/day/1/input, and look in the request headers. It's
+a long hex string. For example click on "input" and look for the "cookie:" section and take the value after "session=".
+Export that to an environment variable AOC_SESSION. Or, if you prefer more persistence,
+you can write it to a plain text file at ~/.config/aocd/token.
+"""
+
 import inspect
 import io
 
@@ -26,8 +30,11 @@ def load_input_data(year=None, day=None):
     year = year or int(Path(calling_fname).parent.stem[1:])
     day = day or int(Path(calling_fname).stem[4:6])
     print(f"Advent of Code {year}, day {day}")
-    return Puzzle(year=year, day=day).input_data
-
+    try:
+        return Puzzle(year=year, day=day).input_data
+    except AocdError as e:
+        print(AOCD_COOKIE_HELP)
+        raise e
 
 def ints_from_lines(lines, sep="\n"):
     return [int(line) for line in lines.split(sep) if line.strip()]
