@@ -2,7 +2,7 @@
 #     "Puzzle inputs differ by user.  Please log in to get your puzzle input."
 # Then you need to import the session cookie
 #
-from aocd import AocdError
+from aocd.exceptions import DeadTokenError
 
 AOCD_COOKIE_HELP = """
 For getting session cookie see:
@@ -32,7 +32,7 @@ def load_input_data(year=None, day=None):
     print(f"Advent of Code {year}, day {day}")
     try:
         return Puzzle(year=year, day=day).input_data
-    except AocdError as e:
+    except DeadTokenError as e:
         print(AOCD_COOKIE_HELP)
         raise e
 

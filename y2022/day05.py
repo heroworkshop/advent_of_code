@@ -1,4 +1,4 @@
-from collections import defaultdict, namedtuple, deque
+from collections import deque
 
 from aocd_tools import load_input_data
 
@@ -59,9 +59,8 @@ def run(create_mover):
 
     crates, instructions = input_data.split("\n\n")
 
-    lines = list(crates.split("\n"))
-    crates = parse_crates(lines)
-    stacks = list(zip(*crates))
+    crates = parse_crates(crates.split("\n"))
+    stacks = zip(*crates)
     stacks = [make_stack(s) for s in stacks]
 
     for instruction in instructions.split("\n"):

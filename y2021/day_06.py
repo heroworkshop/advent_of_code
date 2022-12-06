@@ -17,7 +17,7 @@ def run():
 
 
 def solution1(fish):
-    for day in range (80):
+    for day in range(80):
         next_gen = []
         for f in fish:
             f -= 1
@@ -41,6 +41,7 @@ def solution2_bf(fish):
         fish = next_gen
         print(day, len(fish))
     return len(fish)
+
 
 def model_growth1(fish):
     days = 256
@@ -70,11 +71,12 @@ def solution2(fish):
     d = deque([0] * 9)
     for f in fish:
         d[f] += 1
-    for day in range(days):
-        d.append(d.popleft())
-        d[6] += d[-1]
-        #print(sum(d))
+    for _ in range(days):
+        d.append(d.popleft())  # create a new lanternfish with an internal timer of 8
+        d[6] += d[-1]  # zero-timer fish internal timer would reset to 6
+        print(d)
     return sum(d)
+
 
 if __name__ == "__main__":
     run()
