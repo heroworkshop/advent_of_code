@@ -63,6 +63,14 @@ class Grid:
     def width(self):
         return self.x_bounds.max - self.x_bounds.min + 1
 
+    @property
+    def x_vals(self):
+        return range(self.x_bounds.min, self.x_bounds.max)
+
+    @property
+    def y_vals(self):
+        return range(self.y_bounds.min, self.y_bounds.max)
+
     def linear_index(self, p):
         return p[0] + p[1] * self.width
 

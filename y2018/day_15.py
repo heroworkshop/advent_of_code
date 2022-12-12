@@ -1,8 +1,11 @@
 import copy
+import json
+import math
 from collections import defaultdict
+from typing import Dict, Tuple, List
 
-from aocd_tools import load_input_data, grid_from_lines
-
+from aocd_tools import load_input_data, grid_from_lines, Grid
+from dijkstra import Dijkstra, Step
 
 EXAMPLE = """
 #########
@@ -22,7 +25,11 @@ class Actor:
     def __init__(self, pos, symbol):
         self.pos = pos
         self.symbol = symbol
-        self.distance_graph = defaultdict(lambda: INFINITY)
+        self.hit_points = 100
+        self.distance_graph = defaultdict(lambda: math.inf)
+
+    def serialise(self):
+        return self.symbol, self.hit_points
 
     def compute_distances(self, grid):
         nodes = [self.pos]
@@ -41,37 +48,52 @@ class Actor:
                     nodes.append(np)
 
 
-def extract_actors(grid, symbols):
-    actors = []
+def move_actor(move_from: Tuple, move_to: Tuple, actors: Dict[Tuple, Actor], grid: Grid):
+    symbol = grid.at(move_from)
+    grid.add(move_to, symbol)
+    grid.add(move_from, ".")
+    actors[move_to] = actors[move_from]
+    actors[move_to].pos = move_to
+    del (actors[move_from])
+
+
+def extract_actors(grid, symbols="EG") -> Dict[Tuple, Actor]:
+    actors = {}
     for y in range(grid.y_bounds.min, grid.y_bounds.max + 1):
         for x in range(grid.x_bounds.min, grid.x_bounds.max + 1):
             s = grid.at((x, y))
             if s in symbols:
-                a = Actor((x, y), s)
-                a.compute_distances(grid)
-                print(render_distances(grid, a.distance_graph))
-                actors.append(a)
+                actors[(x, y)] = Actor((x, y), s)
     return actors
 
 
-def render_distances(grid, distances):
-    g = copy.deepcopy(grid)
-    for p, d in distances.items():
-        if d == INFINITY:
-            d = "X"
-        elif d > 9:
-            d = "x"
-        g.add(p, d)
-    return g.render()
+class EnemyFinder(Dijkstra):
+    def __init__(self, initial_state, walls: Grid, actor: Actor):
+        super().__init__(initial_state)
+        self.walls = walls
+        self.start = actor.pos
+        self.enemy = "E" if actor.symbol = "G" else "G"
 
-def nearest_enemy(actor, actors):
+    @staticmethod
+    def serialise(actors: Dict[Tuple, Actor]):
+        return json.dumps({k: v.serialise() for k, v in actors.items()})
+
+    def valid_moves(self, actors: Dict[Tuple, Actor]) -> List[Step]:
+        raise NotImplementedError
+
+    @staticmethod
+    def score(state) -> int:
+        """Lower is better. 0 is winner"""
+        return 0
+
+
+def nearest_enemy(actor: Actor, actors: Dict[Tuple, Actor], grid: Grid):
     pass
 
 
 def solve1(grid):
-    actors = extract_actors(grid, "EG")
+    actors = extract_actors(grid)
     print(len(actors), " actors")
-    actors.sort(key=lambda x: grid.linear_index(x.pos))
 
     for a in actors:
         print(a.symbol, a.pos)

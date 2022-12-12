@@ -1,10 +1,11 @@
 import heapq
+import time
 from typing import List, NamedTuple, Any
 
 
 class Move(NamedTuple):
-    score: int
     step_count: int
+    score: int
     state: Any
     path: List[Any]
 
@@ -26,20 +27,26 @@ class Dijkstra:
         self.report_rate = 1000  # print progress after this many iterations
         self.store_path = False
         self.add_move(0, initial_state, [])
+        self.start_time = 0
+        self.end_time = 0
+
+    @property
+    def time_taken(self):
+        return self.end_time - self.start_time
 
     def add_move(self, step_count: int, state: Any, current_path: List):
         self.visited.add(self.serialise(state))
-        path = current_path[:]
+        path = []
         if self.store_path:
+            path = current_path[:]
             path.append(state)
-        heapq.heappush(self.queue, Move(step_count=step_count, score=self.score(state), state=state, path=path))
+        heapq.heappush(self.queue, Move(score=self.score(state), step_count=step_count,  state=state, path=path))
 
     @staticmethod
     def serialise(state):
         raise NotImplementedError
 
-    @staticmethod
-    def score(state) -> int:
+    def score(self, state) -> int:
         """Lower is better. 0 is winner"""
         return 0
 
@@ -47,6 +54,7 @@ class Dijkstra:
         raise NotImplementedError
 
     def search(self):
+        self.start_time = time.process_time()
         while self.queue:
             move: Move = heapq.heappop(self.queue)
             self.iterations += 1
@@ -58,6 +66,7 @@ class Dijkstra:
             self.queue_new_moves(move)
             self.report()
 
+        self.end_time = time.process_time()
         return self.best
 
     def report(self):
