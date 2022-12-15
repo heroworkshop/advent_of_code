@@ -2,7 +2,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import NamedTuple, List
 
-from aocd_tools import load_input_data, Grid
+from aocd_tools import load_input_data, Grid, Pos
 from dijkstra import Dijkstra, Step
 
 EXAMPLE = """Sabqponm
@@ -48,11 +48,6 @@ def parse(values: List[str]):
 
 def extract_last_int(line):
     return int(line.split()[-1])
-
-
-class Pos(NamedTuple):
-    x: int
-    y: int
 
 
 class Solver(Dijkstra):
