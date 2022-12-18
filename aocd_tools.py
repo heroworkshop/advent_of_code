@@ -30,6 +30,19 @@ class Pos(NamedTuple):
     x: int
     y: int
 
+    def __add__(self, other):
+        return Pos(self.x + other.x, self.y + other.y)
+
+
+class Pos3d(NamedTuple):
+    x: int
+    y: int
+    z: int
+
+    def __add__(self, other):
+        return Pos3d(self.x + other.x, self.y + other.y, self.z + other.z)
+
+
 def load_input_data(year=None, day=None):
     f = inspect.currentframe()
     calling_fname = f.f_back.f_code.co_filename

@@ -72,7 +72,7 @@ class Dijkstra:
     def report(self):
         if self.iterations % self.report_rate:
             return
-        print(f"{self.iterations:6} Q:{len(self.queue):6} Prune:{self.pruned:6} Dups:{self.duplicates:6}")
+        print(f"{self.iterations:6} Q:{len(self.queue):6} Prune:{self.pruned:6} Dups:{self.duplicates:6} Best:{self.best}")
 
     def queue_new_moves(self, move):
         for cost, new_move_state in self.valid_moves(move.state):

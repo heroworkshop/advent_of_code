@@ -25,6 +25,7 @@ def run():
 
 def parse(line: str):
     return [int(item) for item in line.split()]
+    # return Pos(*[int(v) for v in line.split(",")])
     # return [ord(ch) for ch in line]
     # return line
 
