@@ -2,6 +2,8 @@
 #     "Puzzle inputs differ by user.  Please log in to get your puzzle input."
 # Then you need to import the session cookie
 #
+from typing import NamedTuple
+
 from aocd.exceptions import DeadTokenError
 
 AOCD_COOKIE_HELP = """
@@ -22,6 +24,23 @@ from collections import defaultdict, namedtuple
 from pathlib import Path
 
 from aocd.models import Puzzle
+
+
+class Pos(NamedTuple):
+    x: int
+    y: int
+
+    def __add__(self, other):
+        return Pos(self.x + other.x, self.y + other.y)
+
+
+class Pos3d(NamedTuple):
+    x: int
+    y: int
+    z: int
+
+    def __add__(self, other):
+        return Pos3d(self.x + other.x, self.y + other.y, self.z + other.z)
 
 
 def load_input_data(year=None, day=None):
@@ -62,6 +81,14 @@ class Grid:
     @property
     def width(self):
         return self.x_bounds.max - self.x_bounds.min + 1
+
+    @property
+    def x_vals(self):
+        return range(self.x_bounds.min, self.x_bounds.max + 1)
+
+    @property
+    def y_vals(self):
+        return range(self.y_bounds.min, self.y_bounds.max + 1)
 
     def linear_index(self, p):
         return p[0] + p[1] * self.width

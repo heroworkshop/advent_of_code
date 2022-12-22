@@ -1,6 +1,6 @@
 from typing import NamedTuple
 
-from aocd_tools import load_input_data
+from aocd_tools import load_input_data, Pos
 
 EXAMPLE = """R 4
 U 4
@@ -25,11 +25,6 @@ class Move(NamedTuple):
     dx: int
     dy: int
     count: int
-
-
-class Pos(NamedTuple):
-    x: int
-    y: int
 
 
 DIRECTIONS = {"U": (0, -1), "D": (0, 1), "L": (-1, 0), "R": (1, 0)}
