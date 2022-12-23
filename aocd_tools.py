@@ -73,14 +73,19 @@ def compute_bounds(values, border=1):
 
 class Grid:
     def __init__(self, border=0, default_val=" "):
-        self.grid = defaultdict(lambda: default_val)
+        self.grid = {}
         self.x_bounds = None
         self.y_bounds = None
         self.border = border
+        self.default_val = default_val
 
     @property
     def width(self):
         return self.x_bounds.max - self.x_bounds.min + 1
+
+    @property
+    def height(self):
+        return self.y_bounds.max - self.y_bounds.min + 1
 
     @property
     def x_vals(self):
@@ -101,14 +106,14 @@ class Grid:
         self.grid[p] = ch
 
     def at(self, p):
-        return self.grid[p]
+        return self.grid.get(p, self.default_val)
 
     def render(self) -> str:
         self.update_bounds()
         result = io.StringIO()
         for y in range(self.y_bounds.min, self.y_bounds.max + 1):
             for x in range(self.x_bounds.min, self.x_bounds.max + 1):
-                ch = self.grid[(x, y)]
+                ch = self.grid.get((x, y), self.default_val)
                 print(ch, file=result, end="")
             print(file=result)
         return result.getvalue()
