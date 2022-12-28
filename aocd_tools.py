@@ -6,6 +6,7 @@ from typing import NamedTuple
 
 from aocd.exceptions import DeadTokenError
 
+
 AOCD_COOKIE_HELP = """
 For getting session cookie see:
 https://github.com/wimglenn/advent-of-code-wim/issues/1
@@ -20,7 +21,7 @@ you can write it to a plain text file at ~/.config/aocd/token.
 import inspect
 import io
 
-from collections import defaultdict, namedtuple
+from collections import namedtuple
 from pathlib import Path
 
 from aocd.models import Puzzle
@@ -33,6 +34,9 @@ class Pos(NamedTuple):
     def __add__(self, other):
         return Pos(self.x + other.x, self.y + other.y)
 
+    def __sub__(self, other):
+        return Pos(self.x - other.x, self.y - other.y)
+
 
 class Pos3d(NamedTuple):
     x: int
@@ -42,6 +46,11 @@ class Pos3d(NamedTuple):
     def __add__(self, other):
         return Pos3d(self.x + other.x, self.y + other.y, self.z + other.z)
 
+    def __sub__(self, other):
+        return Pos3d(self.x - other.x, self.y - other.y, self.z - other.z)
+
+
+NEIGHBOURS = [Pos(-1, -1), Pos(0, -1), Pos(1, -1), Pos(-1, 0), Pos(1, 0), Pos(-1, 1), Pos(0, 1), Pos(1, 1)]
 
 def load_input_data(year=None, day=None):
     f = inspect.currentframe()
@@ -122,7 +131,7 @@ class Grid:
         x, y = p
         return [
             (x+dx, y+dy)
-            for dx, dy in [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
+            for dx, dy in NEIGHBOURS
             if (x+dx, y+dy) in self.grid
         ]
 

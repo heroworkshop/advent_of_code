@@ -17,68 +17,65 @@ EXAMPLE = """1
 
 def run():
     input_data = load_input_data(2022, 20)
-    #input_data = EXAMPLE
+    # input_data = EXAMPLE
 
     print(f"loaded input data ({len(input_data)} bytes)")
 
     values = input_data.split("\n")
     entries = [int(n) for n in values]
+    print(entries)
 
     print("solution1 = ", solution1(entries))
 
     print("solution2 = ", solution2(entries))
 
 
-class CircularBuffer:
-    def __init__(self, entries):
-        self.entries = entries
-        self.idx_by_pos = {idx: idx for idx, val in enumerate(entries)}
-        self.pos_by_idx = {idx: idx for idx, val in enumerate(entries)}
+class SimpleCircularBuffer:
+    def __init__(self, entries, m=1):
+        self.entries = [(i, int(v) * m) for i, v in enumerate(entries)]
+
+    def get_at(self, i):
+        return self.entries[i % len(self.entries)]
+
+    def find_by_index(self, i):
+        for idx, pair in enumerate(self.entries):
+            if i == pair[0]:
+                return idx
+
+    def find_by_value(self, i):
+        for idx, pair in enumerate(self.entries):
+            if i == pair[1]:
+                return idx
 
     def mix(self):
-        print(f"initial: {self.ordered()}")
-        check_values = set(self.entries)
-        for idx in range(len(self.entries)):
-            value = self.entries[idx]
-            self.move_item(idx, value)
-        assert set(self.ordered()) == check_values
-            # print(f"{idx:7}: {self.ordered()}")
+        size = len(self.entries)
+        for i in range(size):
+            idx = self.find_by_index(i)
+            v = self.entries.pop(idx)
+            self.entries.insert((idx + v[1]) % len(self.entries), v)
+            # print(self.values())
 
-    def move_item(self, idx, by):
-        move_from = self.pos_by_idx[idx] % len(self.entries)
-        move_to = (move_from + by) % len(self.entries)
-        dp = -1 if by < 0 else 1
-        new_positions = {}
-        new_positions[move_to % len(self.entries)] = self.idx_by_pos[move_from % len(self.entries)]
-        p = move_to
-        while p != move_from:
-            v = self.idx_by_pos[p]
-            p = (p - dp) % len(self.entries)
-            new_positions[p] = v
+    def values(self):
+        return [v[1] for v in self.entries]
 
-        for p, i in new_positions.items():
-            self.idx_by_pos[p] = i
-            self.pos_by_idx[i] = p
-
-    def ordered(self):
-        return [self.entries[self.idx_by_pos[pos]] for pos in range(len(self.entries))]
-
-    def get_at(self, p):
-        v = self.entries[self.idx_by_pos[p % len(self.entries)]]
-        print(v)
-        return v
+    def grove_coordinates(self):
+        zero_index = self.find_by_value(0)
+        return [self.get_at(p + zero_index)[1] for p in [1000, 2000, 3000]]
 
 
 def solution1(entries):
-    buffer = CircularBuffer(entries)
+    buffer = SimpleCircularBuffer(entries)
     buffer.mix()
-    zero_index = buffer.entries.index(0)
-    zero_p = buffer.pos_by_idx[zero_index]
-    return sum(buffer.get_at(p + zero_p) for p in [1000, 2000, 3000])
+    return sum(buffer.grove_coordinates())
 
 
-def solution2(v):
-    return
+def solution2(entries):
+    buffer = SimpleCircularBuffer(entries, 811589153)
+    #print(f"initial: {buffer.values()}")
+    for count in range(10):
+        buffer.mix()
+        #print(f"{count:3}: {buffer.values()}")
+    return sum(buffer.grove_coordinates())
 
 
 if __name__ == "__main__":

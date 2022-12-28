@@ -1,7 +1,7 @@
 import time
 from collections import deque
 from dataclasses import dataclass
-from typing import NamedTuple, List
+from typing import NamedTuple, List, Set
 
 from aocd_tools import load_input_data, Pos
 
@@ -68,12 +68,19 @@ def run():
     dt = get_elapsed(t)
     print(f"in {dt}")
 
-    rocks = [make_rock_prefab_bits(entry) for entry in ROCKS.split("\n\n")]
-    print(rocks)
+
     t = time.process_time()
     print("solution2 = ", solution2(input_data, rocks))
     dt = get_elapsed(t)
     print(f"in {dt}")
+
+
+    # rocks = [make_rock_prefab_bits(entry) for entry in ROCKS.split("\n\n")]
+    # print(rocks)
+    # t = time.process_time()
+    # print("solution2 = ", solution2(input_data, rocks))
+    # dt = get_elapsed(t)
+    # print(f"in {dt}")
 
 
 def get_elapsed(start_t):
@@ -105,15 +112,13 @@ def make_rock_prefab_bits(entry: str) -> Shape:
 
 
 def solution1(jets, rock_prefabs):
-    rock_i = 0
     jet_i = 0
     top = 0
     grounded = set()
 
-    for count in range(2022):
+    for rock_i, _ in enumerate(range(2022)):
         pos = Pos(2, top + 3)
         rock = make_rock(pos, rock_prefabs, rock_i)
-        rock_i += 1
         while True:
             # jet of gas
             dx = -1 if jets[jet_i % len(jets)] == "<" else 1
@@ -129,6 +134,68 @@ def solution1(jets, rock_prefabs):
                 grounded.update(rock)
                 break
         top = max({p.y for p in grounded}) + 1
+    return top
+
+
+def grounded_state(grounded: Set, pos:Pos):
+    result = []
+    for y in range(pos.y, pos.y - 10, -1):
+        b = sum(1 << x for x in range(7) if Pos(x, y) in grounded)
+        result.append(b)
+    return tuple(result)
+
+
+def tidy_grounded(grounded: Set, top: int):
+    discard = set()
+    for p in grounded:
+        if p.y < top - 11:
+            discard.add(p)
+    grounded.difference_update(discard)
+
+
+def solution2(jets, rock_prefabs):
+    rock_i = 0
+    jet_i = 0
+    top = 0
+    grounded = set()
+    seen = {}
+    extra_blocks = 0
+
+    remaining = 1000000000000
+    while remaining:
+        if remaining % 1000 == 0:
+            print(remaining)
+        pos = Pos(2, top + 3)
+        rock = make_rock(pos, rock_prefabs, rock_i)
+        rock_i += 1
+        state = rock_i, jet_i, grounded_state(grounded, pos)
+        if state in seen:
+            print(f"repeat found at {remaining}")
+            prev_remaining, prev_top = seen[state]
+            diff = remaining - prev_remaining
+
+            while remaining > diff:
+                remaining -= diff
+                extra_blocks += top - prev_top
+        seen[state] = remaining, top
+
+        while True:
+            # jet of gas
+            dx = -1 if jets[jet_i % len(jets)] == "<" else 1
+            jet_i += 1
+            new_rock = update_rock(Pos(dx, 0), rock)
+            if valid(new_rock, grounded):
+                rock = new_rock
+            # gravity
+            new_rock = update_rock(Pos(0, -1), rock)
+            if valid(new_rock, grounded):
+                rock = new_rock
+            else:
+                grounded.update(rock)
+                break
+        top = max({p.y for p in grounded}) + 1
+        remaining -= 1
+        tidy_grounded(grounded, top)
         # render(grounded, top)
     return top
 
@@ -191,7 +258,7 @@ def valid_bits(pos: Pos, rock: Shape, grounded: GroundedBlocks):
     return True
 
 
-def solution2(jets, rock_prefabs):
+def solution2_bits(jets, rock_prefabs):
     rock_i = 0
     jet_i = 0
     grounded = GroundedBlocks()
