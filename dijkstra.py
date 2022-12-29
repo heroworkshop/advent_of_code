@@ -4,8 +4,8 @@ from typing import List, NamedTuple, Any
 
 
 class Move(NamedTuple):
-    step_count: int
     score: int
+    step_count: int
     state: Any
     path: List[Any]
 
