@@ -34,7 +34,7 @@ class GroundedBlocks:
         self.rows = [0 for _ in range(self.buffer_size)]
         self.top = -1
 
-    def add(self, shape: Shape, x: int=0):
+    def add(self, shape: Shape, x: int = 0):
         for row in reversed(shape):
             self.top += 1
             self.rows[self.top % self.buffer_size] = (row << x)
@@ -55,6 +55,7 @@ class GroundedBlocks:
             print(f"{y:5} |{bits:.>7}|")
         print()
 
+
 def run():
     input_data = load_input_data(2022, 17)
     # input_data = EXAMPLE
@@ -68,12 +69,10 @@ def run():
     dt = get_elapsed(t)
     print(f"in {dt}")
 
-
     t = time.process_time()
     print("solution2 = ", solution2(input_data, rocks))
     dt = get_elapsed(t)
     print(f"in {dt}")
-
 
     # rocks = [make_rock_prefab_bits(entry) for entry in ROCKS.split("\n\n")]
     # print(rocks)
@@ -108,6 +107,7 @@ def make_rock_prefab_bits(entry: str) -> Shape:
     def str_to_bin(s):
         s = s.replace(".", "0").replace("#", "1")
         return "".join(reversed(s))
+
     return [int(str_to_bin(row), 2) for row in entry.split("\n")]
 
 
@@ -137,7 +137,7 @@ def solution1(jets, rock_prefabs):
     return top
 
 
-def grounded_state(grounded: Set, pos:Pos):
+def grounded_state(grounded: Set, pos: Pos):
     result = []
     for y in range(pos.y, pos.y - 10, -1):
         b = sum(1 << x for x in range(7) if Pos(x, y) in grounded)
@@ -209,7 +209,6 @@ def render(blocks, top):
     print("+-------+")
 
 
-
 def make_rock(pos, prefabs, i):
     prefab = prefabs[i % len(prefabs)]
     return {pos + p for p in prefab}
@@ -236,6 +235,7 @@ def valid(rock, grounded):
     if max(x_vals) > 6:
         return False
     return True
+
 
 def valid_bits(pos: Pos, rock: Shape, grounded: GroundedBlocks):
     y_top = pos.y + len(rock) - 1

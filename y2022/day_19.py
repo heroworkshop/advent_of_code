@@ -1,15 +1,20 @@
 import dataclasses
 from dataclasses import astuple
 import time
-from collections import deque
 from dataclasses import dataclass
+from functools import lru_cache
+from math import prod
 from typing import NamedTuple, List, Tuple, Optional
 
-from aocd_tools import load_input_data, get_elapsed
+from aocd_tools import load_input_data# , get_elapsed
 
 EXAMPLE = """Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian. 
 Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian."""
 
+
+def get_elapsed(t0: int):
+    t = time.process_time()
+    return t - t0
 
 @dataclass
 class Resources:
@@ -30,6 +35,8 @@ class Resources:
         self.obsidian -= right.obsidian
         self.geode -= right.geode
 
+    def as_tuple(self):
+        return (self.ore, self.clay, self.obsidian, self.geode)
 
 class State(NamedTuple):
     robots: Resources
@@ -39,6 +46,9 @@ class State(NamedTuple):
 
 
 def track_path(p: State):
+    if not p:
+        print("No solution found")
+        return
     path = [p]
     while p.previous is not None:
         p = p.previous
@@ -60,53 +70,62 @@ class Blueprint(NamedTuple):
     obsidian: Resources
     geode: Resources
 
+    def most_ore_robots_needed(self):
+        return max(self.ore.ore, self.clay.ore, self.obsidian.ore, self.geode.ore)
+
+    def most_clay_robots_needed(self):
+        return max(self.ore.clay, self.clay.clay, self.obsidian.clay, self.geode.clay)
+
     def geodes_mined(self, t):
         iterations = 0
+        seen = set()
         initial_state = State(robots=Resources(ore=1),
                               resources=Resources(),
                               time=t, previous=None)
-        queue = deque([initial_state])
+        queue = [initial_state]
         best = 0
         best_path = None
         while queue:
             iterations += 1
             if iterations % 10000 == 0:
                 print(f"bp:{self.id} iter: {iterations} Q:{len(queue)} best:{best}")
-            state = queue.popleft()
+            state = queue.pop()
+
+            unique_state = (state.time, state.robots.as_tuple(), state.resources.as_tuple())
+            if unique_state in seen:
+                continue
+            seen.add(unique_state)
             # collect resources
             resources = dataclasses.replace(state.resources)
             resources.add(state.robots)
             if state.resources.geode > best:
-                best = resources.geode
+                best = state.resources.geode
                 best_path = state
                 print(f"bp:{self.id} iter: {iterations} Q:{len(queue)} best:{best}")
 
-            if state.time -1 == 0:
+            if state.time == 0:
                 continue
             if best_possible(state.robots.geode, state.time) + resources.geode <= best:
                 continue
             # build robots
             prev = state
-            if can_build(self.geode, state.resources):
-                queue.append(self.make_geode_robot(resources, state.robots, state.time, prev))
-                continue
+            queue.append(self.make_no_robots(resources, state.robots, state.time, prev))
+            if can_build(self.ore, state.resources) and state.robots.ore < self.most_ore_robots_needed():
+                queue.append(self.make_ore_robot(resources, state.robots, state.time, prev))
+            if can_build(self.clay, state.resources) and state.robots.clay < self.most_clay_robots_needed():
+                queue.append(self.make_clay_robot(resources, state.robots, state.time, prev))
             if can_build(self.obsidian, state.resources):
                 queue.append(self.make_obsidian_robot(resources, state.robots, state.time, prev))
-            if can_build(self.clay, state.resources):
-                queue.append(self.make_clay_robot(resources, state.robots, state.time, prev))
-            if can_build(self.ore, state.resources):
-                queue.append(self.make_ore_robot(resources, state.robots, state.time, prev))
-            queue.append(self.make_no_robots(resources, state.robots, state.time, prev))
+            if can_build(self.geode, state.resources):
+                queue.append(self.make_geode_robot(resources, state.robots, state.time, prev))
 
         track_path(best_path)
         return best
 
-
     def make_no_robots(self, resources, robots, t, prev):
         res = dataclasses.replace(resources)
         rob = dataclasses.replace(robots)
-        state = State(resources=res, robots=rob, time=t - 1, previous=prev)
-        return state
+        return State(resources=res, robots=rob, time=t - 1, previous=prev)
 
     def make_ore_robot(self, resources, robots, t, prev):
         res = dataclasses.replace(resources)
@@ -165,7 +184,7 @@ def make_blueprint(entry):
 
 def run():
     input_data = load_input_data(2022, 19)
-    input_data = EXAMPLE
+    # input_data = EXAMPLE
 
     print(f"loaded input data ({len(input_data)} bytes)")
 
@@ -174,7 +193,7 @@ def run():
     print(entries[:50])
 
     t = time.process_time()
-    print("solution1 = ", solution1(entries))
+    #print("solution1 = ", solution1(entries))
     dt = get_elapsed(t)
     print(f"in {dt}")
     t = time.process_time()
@@ -189,8 +208,9 @@ def solution1(blueprints):
     return sum(quality_levels)
 
 
-def solution2(entries):
-    return
+def solution2(blueprints):
+    geodes = {blueprint.id: blueprint.geodes_mined(32) for blueprint in blueprints[:3]}
+    return prod(geodes.values())
 
 
 if __name__ == "__main__":
