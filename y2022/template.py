@@ -1,8 +1,9 @@
+import time
 from collections import deque
 from dataclasses import dataclass
 from typing import NamedTuple, List
 
-from aocd_tools import load_input_data
+from aocd_tools import load_input_data, get_elapsed
 
 EXAMPLE = """
 """
@@ -18,9 +19,14 @@ def run():
     entries = [parse(line) for line in entries]
     print(entries[:50])
 
+    t = time.process_time()
     print("solution1 = ", solution1(entries))
-
+    dt = get_elapsed(t)
+    print(f"in {dt}")
+    t = time.process_time()
     print("solution2 = ", solution2(entries))
+    dt = get_elapsed(t)
+    print(f"in {dt}")
 
 
 def parse(line: str):

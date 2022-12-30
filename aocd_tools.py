@@ -2,6 +2,7 @@
 #     "Puzzle inputs differ by user.  Please log in to get your puzzle input."
 # Then you need to import the session cookie
 #
+import time
 from typing import NamedTuple
 
 from aocd.exceptions import DeadTokenError
@@ -51,6 +52,15 @@ class Pos3d(NamedTuple):
 
 
 NEIGHBOURS = [Pos(-1, -1), Pos(0, -1), Pos(1, -1), Pos(-1, 0), Pos(1, 0), Pos(-1, 1), Pos(0, 1), Pos(1, 1)]
+
+def get_elapsed(start_t):
+    t = time.process_time() - start_t
+    if t < 1:
+        return f"{t * 1000:.3} ms"
+    if t > 120:
+        return f"{t / 60:.3} mins"
+    return f"{t:.3} s"
+
 
 def load_input_data(year=None, day=None):
     f = inspect.currentframe()
