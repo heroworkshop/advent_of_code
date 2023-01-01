@@ -36,7 +36,7 @@ def parse_directions(directions_str):
     return directions
 
 
-def run():
+def run(observer=None):
     input_data = load_input_data(2022, 22)
     # input_data = EXAMPLE
 
@@ -49,7 +49,7 @@ def run():
     print(f"{grid.width} by {grid.height} grid")
     print(directions)
 
-    print("solution1 = ", solution1(grid, start_pos, directions))
+    print("solution1 = ", solution1(grid, start_pos, directions, observer))
     grid, start_pos = make_grid(map_str)
     print("solution2 = ", solution2(grid, start_pos, directions))
 
@@ -179,33 +179,36 @@ def make_edges():
 
 
 class Player:
-    def __init__(self, start_pos: Pos, edges=None):
+    def __init__(self, start_pos: Pos, edges=None, observer=None):
         self.edges = edges or {}
         self.pos = start_pos
         self.direction = 0
         self.path = {}
+        self.observer = observer
 
     def play(self, grid: Grid, directions: List[Union[str, int]]):
         for d in directions:
             if d == "R":
                 self.direction = (self.direction + 1) % 4
-                print("turn right", self.direction)
+                # print("turn right", self.direction)
             elif d == "L":
                 self.direction = (self.direction - 1) % 4
-                print("turn left", self.direction)
+                # print("turn left", self.direction)
             else:
                 self.move_forward(d, grid, self.edges)
             dir_ch = DIR_CH[self.direction]
             self.path[self.pos] = dir_ch
+            if self.observer:
+                self.observer.update(self, grid)
 
     def move_forward(self, d: int, grid: Grid, edges: Dict):
-        print(f"take {d} steps")
+        # print(f"take {d} steps")
         while d:
             new_direction = self.direction
             if (self.pos, self.direction) in edges:
                 transform = edges[(self.pos, self.direction)]
                 p, new_direction = transform(self.pos)
-                print(f"warping to {p}")
+                # print(f"warping to {p}")
             else:
                 v = Pos(*DIRECTIONS[self.direction])
                 p = v + Pos(*self.pos)
@@ -215,9 +218,9 @@ class Player:
                 p = Pos(x, y)
                 if self.at(p, grid) == " ":
                     p = self.wrap(p, grid)
-                    print(f"Wrapping to {p}")
+                    # print(f"Wrapping to {p}")
             if self.at(p, grid) == "#":
-                print("    hit wall")
+                # print("    hit wall")
                 break
 
             self.pos = p
@@ -225,7 +228,7 @@ class Player:
             dir_ch = DIR_CH[self.direction]
             self.path[self.pos] = dir_ch
             d -= 1
-        print(f"    now at {self.pos}")
+        # print(f"    now at {self.pos}")
 
     def at(self, p: Pos, grid: Grid) -> str:
         return " " if p not in grid.grid else grid.at(p)
@@ -251,8 +254,8 @@ class Player:
         return Pos(x, y)
 
 
-def solution1(grid, start_pos, directions):  # < 93242
-    player = Player(start_pos)
+def solution1(grid, start_pos, directions, observer=None):  # < 93242
+    player = Player(start_pos, observer=observer)
     player.play(grid, directions)
 
     for p, ch in player.path.items():
