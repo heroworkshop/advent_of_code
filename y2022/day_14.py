@@ -62,7 +62,7 @@ def show(grid):
     print()
 
 
-def run():
+def run(observer=None):
     input_data = load_input_data(2022, 14)
     # input_data = EXAMPLE
 
@@ -72,9 +72,9 @@ def run():
     entries = [parse(line) for line in entries]
     print(entries[:50])
 
-    print("solution1 = ", solution1(entries))
+    print("solution1 = ", solution1(entries, observer))
 
-    print("solution2 = ", solution2(entries))
+    print("solution2 = ", solution2(entries, observer))
 
 
 def parse(line: str):
@@ -82,7 +82,7 @@ def parse(line: str):
     return [make_point(s) for s in points]
 
 
-def solution1(entries):
+def solution1(entries, observer):
     grid = make_grid(entries)
     grid.update_bounds()
     show(grid)
@@ -97,7 +97,7 @@ def solution1(entries):
     return n
 
 
-def solution2(entries):
+def solution2(entries, observer):
     grid = make_grid(entries)
     grid.update_bounds()
     add_floor(grid)
@@ -109,8 +109,10 @@ def solution2(entries):
         while True:
             add_sand(Point(500, 0), grid)
             n += 1
-            if n % 10000 == 0:
-                show(grid)
+            if observer:
+                observer.update(grid)
+            # if n % 10000 == 0:
+                # show(grid)
     except BoundsError:
         pass
     show(grid)

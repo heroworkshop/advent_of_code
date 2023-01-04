@@ -75,7 +75,9 @@ class EnemyFinder(Dijkstra):
 
     @staticmethod
     def serialise(actors: Dict[Tuple, Actor]):
-        return json.dumps({k: v.serialise() for k, v in actors.items()})
+        goblins = {(v.pos.x, v.pos.y, v.hit_points) for k, v in actors.items() if v.symbol=="G"}
+        elves = {(v.pos.x, v.pos.y, v.hit_points) for k, v in actors.items() if v.symbol=="E"}
+        return sorted(goblins), sorted(elves)
 
     def valid_moves(self, actors: Dict[Tuple, Actor]) -> List[Step]:
         raise NotImplementedError

@@ -1,5 +1,7 @@
 import pygame
 
+from aocd_tools import Pos
+
 
 class PygameGridView:
     COLOUR_TABLE = {
@@ -24,11 +26,12 @@ class PygameGridView:
         self.grid_line_width = 1
         self.show_grid = True
         self.screen = screen
+        self.offset = Pos(0, 0)
 
     def draw(self):
         for row, y in enumerate(range(0, self.height, self.pixel_size)):
             for col, x in enumerate(range(0, self.width, self.pixel_size)):
-                self.draw_pixel((col, row), (x, y))
+                self.draw_pixel((col + self.offset.x, row + self.offset.y), (x, y))
 
     def draw_pixel(self, grid_position, position):
         pixel_value = self.grid.value(*grid_position)

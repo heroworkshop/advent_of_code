@@ -9,7 +9,7 @@ EXAMPLE = """
 """
 
 
-def run():
+def run(observer=None):
     input_data = load_input_data(2022, 11)
     input_data = EXAMPLE
 
@@ -20,11 +20,11 @@ def run():
     print(entries[:50])
 
     t = time.process_time()
-    print("solution1 = ", solution1(entries))
+    print("solution1 = ", solution1(entries, observer))
     dt = get_elapsed(t)
     print(f"in {dt}")
     t = time.process_time()
-    print("solution2 = ", solution2(entries))
+    print("solution2 = ", solution2(entries, observer))
     dt = get_elapsed(t)
     print(f"in {dt}")
 
@@ -36,11 +36,11 @@ def parse(line: str):
     # return line
 
 
-def solution1(entries):
+def solution1(entries, observer):
     return
 
 
-def solution2(entries):
+def solution2(entries, observer):
     return
 
 

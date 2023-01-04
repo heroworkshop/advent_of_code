@@ -38,7 +38,7 @@ def parse_move(line: str):
 
 def run():
     input_data = load_input_data(2022, 9)
-    # input_data = EX2
+    input_data = EX2
 
     print(f"loaded input data ({len(input_data)} bytes)")
 
@@ -67,16 +67,13 @@ def do_moves(moves, length):
             for n in range(length - 1):
                 snake[n + 1] = follow(snake[n], snake[n + 1])
             history.add(tail())
-            # show(snake)
-            # print()
+            show(snake)
+            print()
     return history
 
 
 def show(snake):
-    snake_positions = {}
-    for n, p in enumerate(snake):
-        snake_positions[p] = n
-
+    snake_positions = {p: n for n, p in enumerate(snake)}
     for y in range(-16, 6):
         for x in range(-13, 14):
             v = snake_positions.get((x, y), ".")
