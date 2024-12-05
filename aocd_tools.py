@@ -7,7 +7,6 @@ from typing import NamedTuple
 
 from aocd.exceptions import DeadTokenError
 
-
 AOCD_COOKIE_HELP = """
 For getting session cookie see:
 https://github.com/wimglenn/advent-of-code-wim/issues/1
@@ -51,7 +50,9 @@ class Pos3d(NamedTuple):
         return Pos3d(self.x - other.x, self.y - other.y, self.z - other.z)
 
 
-NEIGHBOURS = [Pos(-1, -1), Pos(0, -1), Pos(1, -1), Pos(-1, 0), Pos(1, 0), Pos(-1, 1), Pos(0, 1), Pos(1, 1)]
+ALL_DIRECTIONS = [Pos(*p) for p in ((0, 1), (0, -1), (1, 0), (-1, 0), (1, 1), (-1, 1), (1, -1), (-1, -1))]
+NEIGHBOURS = [p for p in ALL_DIRECTIONS if not all(p)]
+
 
 def get_elapsed(start_t):
     t = time.process_time() - start_t
@@ -74,6 +75,7 @@ def load_input_data(year=None, day=None):
         print(AOCD_COOKIE_HELP)
         raise e
 
+
 def ints_from_lines(lines, sep="\n"):
     return [int(line) for line in lines.split(sep) if line.strip()]
 
@@ -82,7 +84,7 @@ def int_tuples_from_lines(lines, sep):
     return [tuple([int(i) for i in line.strip().split(sep) if i])
             for line in lines.strip().split("\n")
             if line
-           ]
+            ]
 
 
 def compute_bounds(values, border=1):
@@ -140,9 +142,9 @@ class Grid:
     def all_neighbours(self, p):
         x, y = p
         return [
-            (x+dx, y+dy)
+            (x + dx, y + dy)
             for dx, dy in NEIGHBOURS
-            if (x+dx, y+dy) in self.grid
+            if (x + dx, y + dy) in self.grid
         ]
 
 
@@ -195,3 +197,5 @@ def grid4d_from_lines(lines: str, z=0, w=0, default_val=" ") -> Grid4d:
         x, y = 0, y + 1
     result.update_bounds()
     return result
+
+

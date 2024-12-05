@@ -1,16 +1,12 @@
-import unittest
 from primes.prime_factors import PrimeFactors
 
-class TestPrimeFactors(unittest.TestCase):
-    def test_solve_for(self):
-        p = PrimeFactors()
-        v = p.solve_for(200)
-        self.assertEqual([2,2,2,5,5], v)
-        self.assertEqual(1, len(p.cache))
-        v = p.solve_for(600)
-        self.assertEqual([2,2,2,3,5,5], v)
-        self.assertEqual(2, len(p.cache))
 
+def test_solve_for():
+    p = PrimeFactors()
+    v = p.solve_for(200)
+    assert v == [2, 2, 2, 5, 5]
+    assert len(p.cache) == 1
 
-if __name__ == '__main__':
-    unittest.main()
+    v = p.solve_for(600)
+    assert v == [2, 2, 2, 3, 5, 5]
+    assert len(p.cache) == 2

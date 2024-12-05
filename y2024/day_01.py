@@ -1,12 +1,12 @@
-from aocd_tools import load_input_data, ints_from_lines
+from aocd_tools import *
 
 
 def run():
     input_data = load_input_data(2024, 1)
     print(f"loaded input data ({len(input_data)} bytes)")
-
-    lines = input_data.split("\n")
-    entries = [process_one_line(line) for line in lines]
+    entries = int_tuples_from_lines(lines=input_data, sep=" ")
+    # lines = input_data.split("\n")
+    # entries = [process_one_line(line) for line in lines]
     print(entries)
 
     left, right = zip(*entries)

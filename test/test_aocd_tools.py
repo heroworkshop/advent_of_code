@@ -1,65 +1,55 @@
-import unittest
-
 from aocd_tools import Grid, grid_from_lines, int_tuples_from_lines, ints_from_lines
 
 
-class TestParsingFunctions(unittest.TestCase):
-    def test_int_tuples_from_lines(self):
-        lines = """
-        1, 2, 3
-        4, 5, 6
-        """
-        result = int_tuples_from_lines(lines, ",")
-        self.assertEqual([(1, 2, 3), (4, 5, 6)], result)
-
-    def test_ints_from_lines(self):
-        lines = """
-        1
-        4
-        3
-        """
-        result = ints_from_lines(lines)
-        self.assertEqual([1, 4, 3], result)
+def test_int_tuples_from_lines():
+    lines = """
+    1, 2, 3
+    4, 5, 6
+    """
+    result = int_tuples_from_lines(lines, ",")
+    assert result == [(1, 2, 3), (4, 5, 6)]
 
 
-class TestGrid(unittest.TestCase):
-    def test_bounds(self):
-        grid = Grid()
-        grid.add((-1, -2), "#")
-        grid.add((5, 10), "#")
-        grid.update_bounds()
-        self.assertEqual(-1, grid.x_bounds.min)
-        self.assertEqual(-2, grid.y_bounds.min)
-        self.assertEqual(5, grid.x_bounds.max)
-        self.assertEqual(10, grid.y_bounds.max)
-
-    def test_linear_index(self):
-        grid = Grid()
-        grid.add((0,0), ".")
-        grid.add((1,1), ".")
-        grid.update_bounds()
-        self.assertEqual(0, grid.linear_index((0, 0)))
-        self.assertEqual(1, grid.linear_index((1, 0)))
-        self.assertEqual(2, grid.linear_index((0, 1)))
-        self.assertEqual(3, grid.linear_index((1, 1)))
+def test_ints_from_lines():
+    lines = """
+    1
+    4
+    3
+    """
+    result = ints_from_lines(lines)
+    assert result == [1, 4, 3]
 
 
+def test_bounds():
+    grid = Grid()
+    grid.add((-1, -2), "#")
+    grid.add((5, 10), "#")
+    grid.update_bounds()
+    assert grid.x_bounds.min == -1
+    assert grid.y_bounds.min == -2
+    assert grid.x_bounds.max == 5
+    assert grid.y_bounds.max == 10
 
 
-class TestGridFromLines(unittest.TestCase):
-    def test_grid_from_lines(self):
-        lines = ("aaa\n"
-                 "bbb\n"
-                 "ccc\n")
-
-        grid = grid_from_lines(lines)
-        self.assertEqual(0, grid.x_bounds.min)
-        self.assertEqual(2, grid.x_bounds.max)
-        self.assertEqual(0, grid.y_bounds.min)
-        self.assertEqual(2, grid.x_bounds.max)
-
-        self.assertEqual("a", grid.at((0, 0)))
+def test_linear_index():
+    grid = Grid()
+    grid.add((0, 0), ".")
+    grid.add((1, 1), ".")
+    grid.update_bounds()
+    assert grid.linear_index((0, 0)) == 0
+    assert grid.linear_index((1, 0)) == 1
+    assert grid.linear_index((0, 1)) == 2
+    assert grid.linear_index((1, 1)) == 3
 
 
-if __name__ == '__main__':
-    unittest.main()
+def test_grid_from_lines():
+    lines = ("aaa\n"
+             "bbb\n"
+             "ccc\n")
+
+    grid = grid_from_lines(lines)
+    assert grid.x_bounds.min == 0
+    assert grid.x_bounds.max == 2
+    assert grid.y_bounds.min == 0
+    assert grid.x_bounds.max == 2
+    assert grid.at((0, 0)) == "a"
