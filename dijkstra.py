@@ -4,7 +4,6 @@ from typing import List, NamedTuple, Any
 
 
 class Move(NamedTuple):
-    score: int
     step_count: int
     state: Any
     path: List[Any]
@@ -40,15 +39,15 @@ class Dijkstra:
         if self.store_path:
             path = current_path[:]
             path.append(state)
-        heapq.heappush(self.queue, Move(score=self.score(state), step_count=step_count,  state=state, path=path))
+        heapq.heappush(self.queue, Move(step_count=step_count,  state=state, path=path))
 
     @staticmethod
     def serialise(state):
         raise NotImplementedError
 
-    def score(self, state) -> int:
-        """Lower is better. 0 is winner"""
-        return 0
+    @staticmethod
+    def is_win(self, state) -> bool:
+        raise NotImplementedError
 
     def valid_moves(self, state) -> List[Step]:
         raise NotImplementedError
@@ -59,10 +58,8 @@ class Dijkstra:
             move: Move = heapq.heappop(self.queue)
             self.iterations += 1
 
-            if move.score == 0:
-                self.best = min(self.best, move.step_count)
-                self.best_path = move.path
-                continue
+            if self.is_win(move.state):
+                return move.step_count
             self.queue_new_moves(move)
             self.report()
 
@@ -79,8 +76,5 @@ class Dijkstra:
             new_step_count = move.step_count + cost
             if self.serialise(new_move_state) in self.visited:
                 self.duplicates += 1
-                continue
-            if new_step_count >= self.best:
-                self.pruned += 1
                 continue
             self.add_move(new_step_count, new_move_state, move.path)

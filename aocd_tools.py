@@ -64,11 +64,12 @@ def get_elapsed(start_t):
 
 
 def load_input_data(year=None, day=None):
-    f = inspect.currentframe()
-    calling_fname = f.f_back.f_code.co_filename
-    year = year or int(Path(calling_fname).parent.stem[1:])
-    day = day or int(Path(calling_fname).stem[4:6])
-    print(f"Advent of Code {year}, day {day}")
+    if not year or not day:
+        f = inspect.currentframe()
+        calling_fname = f.f_back.f_code.co_filename
+        year = year or int(Path(calling_fname).parent.stem[1:])
+        day = day or int(Path(calling_fname).stem[4:6])
+    print(f"Advent of Code {year}, day {day}", flush=True)
     try:
         return Puzzle(year=year, day=day).input_data
     except DeadTokenError as e:
@@ -100,6 +101,17 @@ class Grid:
         self.border = border
         self.default_val = default_val
 
+    def in_bounds(self, pos: Pos):
+        if pos.x < self.x_bounds.min:
+            return False
+        if pos.x > self.x_bounds.max:
+            return False
+        if pos.y < self.y_bounds.min:
+            return False
+        if pos.y > self.y_bounds.max:
+            return False
+        return True
+
     @property
     def width(self):
         return self.x_bounds.max - self.x_bounds.min + 1
@@ -129,12 +141,15 @@ class Grid:
     def at(self, p):
         return self.grid.get(p, self.default_val)
 
-    def render(self) -> str:
+    def render(self, overlay=None) -> str:
         self.update_bounds()
         result = io.StringIO()
         for y in range(self.y_bounds.min, self.y_bounds.max + 1):
             for x in range(self.x_bounds.min, self.x_bounds.max + 1):
-                ch = self.grid.get((x, y), self.default_val)
+                if overlay and (x, y) in overlay:
+                    ch = overlay[(x, y)]
+                else:
+                    ch = self.grid.get((x, y), self.default_val)
                 print(ch, file=result, end="")
             print(file=result)
         return result.getvalue()
@@ -199,3 +214,15 @@ def grid4d_from_lines(lines: str, z=0, w=0, default_val=" ") -> Grid4d:
     return result
 
 
+def time_report(start_time) -> str:
+    end_time = time.process_time()
+    diff = end_time - start_time
+    if diff > 3600:
+        h = int(diff // 3600)
+        m = int((diff % 3600) // 60)
+        return f"{h}h {m}m"
+    if diff > 60:
+        m = int(diff // 60)
+        s = diff % 60
+        return f"{m}m {s}s"
+    return f"{diff}s"

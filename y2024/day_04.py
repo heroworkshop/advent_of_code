@@ -13,7 +13,7 @@ MXMXAXMASX"""
 
 
 def run():
-    input_data = load_input_data(2024, 4)
+    input_data = load_input_data()
     # input_data = EXAMPLE
     print(f"loaded input data ({len(input_data)} bytes)")
     # entries = int_tuples_from_lines(lines=input_data, sep=" ")
