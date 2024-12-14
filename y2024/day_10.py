@@ -72,7 +72,5 @@ def count_ratings(entries, p):
                 queue.append(new_pos)
     return total
 
-    return total
-
 if __name__ == "__main__":
     run()
