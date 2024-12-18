@@ -1,4 +1,3 @@
-import re
 from aocd_tools import *
 
 

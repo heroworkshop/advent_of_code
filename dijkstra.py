@@ -16,25 +16,26 @@ class Step(NamedTuple):
 
 class Dijkstra:
     def __init__(self, initial_state):
-        self.visited = set()
+        self.visited = {}
         self.queue = []
         self.best = float("inf")
         self.best_path = None
         self.pruned = 0  # removed because a shorter path has been found already
         self.duplicates = 0  # path ignored because node has already been visited
         self.iterations = 0
-        self.report_rate = 1000  # print progress after this many iterations
+        self.report_rate = 10000  # print progress after this many iterations
         self.store_path = False
         self.add_move(0, initial_state, [])
         self.start_time = 0
         self.end_time = 0
+        self.paths = []
 
     @property
     def time_taken(self):
         return self.end_time - self.start_time
 
     def add_move(self, step_count: int, state: Any, current_path: List):
-        self.visited.add(self.serialise(state))
+        self.visited[self.serialise(state)] = step_count
         path = []
         if self.store_path:
             path = current_path[:]
@@ -45,7 +46,6 @@ class Dijkstra:
     def serialise(state):
         raise NotImplementedError
 
-    @staticmethod
     def is_win(self, state) -> bool:
         raise NotImplementedError
 
@@ -59,7 +59,11 @@ class Dijkstra:
             self.iterations += 1
 
             if self.is_win(move.state):
-                return move.step_count
+                self.best_path = move.path
+                self.paths.append((move.step_count, move.path))
+                #return move.step_count
+                if self.best > move.step_count:
+                    self.best = move.step_count
             self.queue_new_moves(move)
             self.report()
 
@@ -74,7 +78,8 @@ class Dijkstra:
     def queue_new_moves(self, move):
         for cost, new_move_state in self.valid_moves(move.state):
             new_step_count = move.step_count + cost
-            if self.serialise(new_move_state) in self.visited:
+            s = self.serialise(new_move_state)
+            if s in self.visited and self.visited[s] < new_step_count:
                 self.duplicates += 1
                 continue
             self.add_move(new_step_count, new_move_state, move.path)
