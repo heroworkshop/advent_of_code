@@ -17,6 +17,7 @@ p=7,3 v=-1,2
 p=2,4 v=2,-3
 p=9,5 v=-3,-3"""
 
+
 @dataclass
 class Robot:
     pos: Pos
@@ -54,17 +55,17 @@ def process_one_line(line):
 
 
 def solution1(robots, limits):
-    for t in range(1,101):
+    for t in range(1, 101):
         for robot in robots:
             robot.update(limits)
         # print(f"{t=}")
         # print(render(robots, limits))
-    a,b,c,d = get_quadrants(robots, limits)
-    return a*b*c*d
+    a, b, c, d = get_quadrants(robots, limits)
+    return a * b * c * d
 
 
 def solution2(robots, limits):
-    for t in range(1,1000001):
+    for t in range(1, 1000001):
         for robot in robots:
             robot.update(limits)
         if detect_tree(robots, limits):
@@ -103,9 +104,10 @@ def render(robots: list[Robot], limits: Pos):
         line = f"{y:3}|"
         for x in range(limits.x):
             ch = tally.get(Pos(x, y), ".")
-            line+=str(ch)
+            line += str(ch)
         lines.append(line)
     return "\n".join(lines)
+
 
 def make_tally(robots: list[Robot]) -> dict[Pos, int]:
     tally = defaultdict(int)
@@ -122,17 +124,18 @@ def get_quadrants(robots: list[Robot], limits: Pos):
             y = 1
         if robot.pos.x < limits.x // 2:
             x = 1
-        if robot.pos.y > limits.y // 2 :
+        if robot.pos.y > limits.y // 2:
             y = 2
         if robot.pos.x > limits.x // 2:
             x = 2
         if x and y:
-            p = x - 1 + 2 * (y-1)
+            p = x - 1 + 2 * (y - 1)
             print(robot.pos, p)
             quadrants[p] += 1
         else:
             print(robot.pos, "None")
     return quadrants
+
 
 if __name__ == "__main__":
     run()
