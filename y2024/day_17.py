@@ -27,20 +27,21 @@ def solution1():
 def solution2():
     prog = instructions_parse("2,4,1,7,7,5,1,7,0,3,4,1,5,5,3,0")
     queue = []
-    heapq.heappush(queue, (0, "111"))
+    heapq.heappush(queue, (0, ""))
     while queue:
         score, v = heapq.heappop(queue)
-        a = v + "0"
-        b = v + "1"
-        for s in (a, b):
-            i = int(s, 2)
-            dev = Device(i, 0, 0, prog)
+        for i in range(8):
+            s = v + f"{i:03b}"
+            j = int(s, 2)
+            dev = Device(j, 0, 0, prog)
             result = dev.run()
-            print(s, result)
-            if result == prog:
-                return i
-            score = len(prog) - count_rmatches(result, prog)
-            heapq.heappush(queue, (score, s))
+            # print(s, result)
+            if tuple(result) == prog:
+                return j
+            new_score = count_rmatches(result, prog)
+            if new_score > score:
+                print(new_score, s, result, prog)
+                heapq.heappush(queue, (new_score, s))
     return 0
 
 def count_rmatches(lhs, rhs):
