@@ -91,13 +91,17 @@ class Solver(Dijkstra):
         self.end = end
         self.walls = walls
         self.store_path = True
+        self.final_state = None
 
     @staticmethod
     def serialise(state):
         return state
 
     def is_win(self, state) -> bool:
-        return state.pos == self.end
+        if state.pos == self.end:
+            self.final_state = state
+            return True
+        return False
 
     def valid_moves(self, state: State) -> list[dijkstra.Step]:
         moves = []
@@ -127,12 +131,14 @@ def solution1(start, end, walls, grid):
 
 
 def solution2(start, end, walls, grid):
-    solver = Solver(State(start, 0), end, walls)
+    initial_state = State(start, 0)
+    solver = Solver(initial_state, end, walls)
     solver.single_solution = False
     cost = solver.search()
     # print(render_path(grid, solver.get_best_path()))
-    all_paths = solver.get_all_best_path_states(end, start)
-    return len(all_paths)
+    all_paths = solver.get_all_best_path_states(solver.final_state, initial_state)
+    all_positions = {s.pos for s in all_paths}
+    return len(all_positions)
 
 
 def make_maze(grid: Grid):

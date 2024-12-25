@@ -10,7 +10,7 @@ class Step(NamedTuple):
 
 class Node(NamedTuple):
     cost: int
-    from_state: [Any]
+    from_state: list[Any]
 
 
 class Dijkstra:
