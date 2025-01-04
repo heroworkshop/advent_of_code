@@ -17,9 +17,10 @@ INPUT_DATA = """319A
 489A
 964A"""
 
+
 def run():
     input_data = INPUT_DATA
-    input_data = EXAMPLE
+    # input_data = EXAMPLE
     print(f"loaded input data ({len(input_data)} bytes)")
 
     entries = input_data.splitlines()
@@ -29,14 +30,55 @@ def run():
         print(f"solution{i} = ", f(entries), time_report(start_time))
 
 
-def get_key_presses(s):
-    for numeric in s:
-        paths = get_numeric_pad_paths(current_numeric, numeric)
-    keys1 = directions_from_numeric(s)
-    keys2 = indirect_keys_from_directions(keys1)
-    keys3 = indirect_keys_from_directions(keys2)
-    return keys3
+def get_key_presses(initial_code, level_count=2):
+    count = 0
+    prev_key = "A"
+    for ch in initial_code:
+        results = get_level_1_directions(ch, prev_key)
+        print(ch, results)
+        count += dfs_get_level_2_directions(results[0], level_count)
+        print(ch, count)
+        prev_key = ch
+    return count
 
+@cache
+def get_level_1_directions(initial_code, prev_key="A"):
+    numeric_queue = deque([(initial_code, "", prev_key)])
+    l1_results = []
+    while numeric_queue:
+        code, presses, start = numeric_queue.pop()
+        if not code:
+            l1_results.append(presses)
+            continue
+        next_key = code[0]
+        paths = press_numeric(start, next_key)
+        for path in paths:
+            # print(start, next_key, path)
+            numeric_queue.append((code[1:], presses + path + "A", next_key))
+    return l1_results
+
+@cache
+def dfs_get_level_2_directions(initial_directions, level):
+    if level == 0:
+        # print(initial_directions)
+        return len(initial_directions)
+    from_key = "A"
+    total = 0
+    for ch in initial_directions:
+        paths = press_direction(from_key, ch)
+        total += dfs_get_level_2_directions(paths[0] + "A", level=level - 1)
+        from_key = ch
+    return total
+
+
+def presses_from_path(path):
+    result = ""
+    p0 = path[0]
+    for p in path[1:]:
+        diff = p - p0
+        result += DIRECTIONS[diff]
+        p0 = p
+    return result
 
 NUMERIC_PAD = {
     "7": (0, 0),
@@ -61,119 +103,93 @@ DIRECTION_PAD = {
     ">": (2, 1),
 }
 
+DIRECTIONS = {
+    (0, -1): "^",
+    (-1, 0): "<",
+    (0, 1): "v",
+    (1, 0): ">",
+}
+
+@cache
 def press_numeric(current, target):
     p0 = Pos(*NUMERIC_PAD[current])
     p1 = Pos(*NUMERIC_PAD[target])
 
     d = p1 - p0
-    moves = ""
+    rl_moves = ""
+    ud_moves = ""
     if d.x > 0:
-        moves += ">" * d.x
+        rl_moves += ">" * d.x
+    elif d.x < 0:
+        rl_moves += "<" * abs(d.x)
     if d.y < 0:
-        moves += "^" * abs(d.y)
-    if d.x < 0:
-        moves += "<" * abs(d.x)
-    if d.y > 0:
-        moves += "v" * d.y
-    return moves
+        ud_moves += "^" * abs(d.y)
+    elif d.y > 0:
+        ud_moves += "v" * d.y
+    if ud_moves and rl_moves:
+        if p0.y == 3 and p1.x ==0:
+            return [ud_moves + rl_moves]
+        if p0.x == 0 and p1.y == 3:
+            return [rl_moves + ud_moves]
+        if d.x < 0:
+            return [rl_moves + ud_moves]
+        else:
+            return [ud_moves + rl_moves]
+    if ud_moves:
+        return [ud_moves]
+    return [rl_moves]
 
-
+@cache
 def press_direction(current, target):
     p0 = Pos(*DIRECTION_PAD[current])
     p1 = Pos(*DIRECTION_PAD[target])
 
     d = p1 - p0
-    moves = ""
+    rl_moves = ""
+    ud_moves = ""
     if d.x > 0:
-        moves += ">" * d.x
+        rl_moves += ">" * d.x
+    elif d.x < 0:
+        rl_moves += "<" * abs(d.x)
     if d.y > 0:
-        moves += "v" * d.y
-    if d.y < 0:
-        moves += "^" * abs(d.y)
-    if d.x < 0:
-        moves += "<" * abs(d.x)
-    return moves
+        ud_moves += "v" * d.y
+    elif d.y < 0:
+        ud_moves += "^" * abs(d.y)
+    if ud_moves and rl_moves:
+        if p0.y == 0 and p1.x == 0:
+            return [ud_moves + rl_moves]
+        if p0.y == 1 and p0.x == 0:
+            return [rl_moves + ud_moves]
+        if d.x < 0:
+            return [rl_moves + ud_moves]
+        else:
+            return [ud_moves + rl_moves]
+    if ud_moves:
+        return [ud_moves]
+    return [rl_moves]
 
 
-
-
-
-
-
-
-class Solver(Dijkstra):
-    def __init__(self, start, end, valid_nodes):
-        super().__init__(start)
-        self.valid_nodes = valid_nodes
-        self.end = end
-
-    def is_win(self, state):
-        return state == self.end
-
-    def report(self):
-        pass
-
-    @staticmethod
-    def serialise(state: Pos):
-        return state
-
-    @staticmethod
-    def neighbours(state: Pos) -> list[Pos]:
-        return [Pos(*p) for p in [(state.x + 1, state.y),
-                                  (state.x - 1, state.y),
-                                  (state.x, state.y + 1),
-                                  (state.x, state.y - 1)]]
-
-    def valid_moves(self, state) -> list[Step]:
-        return [Step(1, p) for p in self.neighbours(state) if p in self.valid_nodes]
-
-    def get_all_best_paths(self, start_pos, end_pos):
-        paths = []
-        queue = [(end_pos, deque())]
-        while queue:
-            pos, path = queue.pop(0)
-            path.appendleft(pos)
-            if pos == start_pos:
-                paths.append(path)
-            else:
-                for node in self.nodes[pos].from_state:
-                    queue.append((node, path.copy()))
-        return paths
-
-@cache
-def get_numeric_pad_paths(start: str, finish: str):
-    valid_nodes = set(Pos(*p) for p in NUMERIC_PAD.values())
-    start_pos = Pos(*NUMERIC_PAD[start])
-    end_pos = Pos(*NUMERIC_PAD[finish])
-    solver = Solver(start_pos, end_pos, valid_nodes)
-    solver.single_solution = False
-    solver.search()
-    return solver.get_all_best_paths(start_pos, end_pos)
-
-@cache
-def get_direction_pad_paths(start: str, finish: str):
-    valid_nodes = set(Pos(*p) for p in DIRECTION_PAD.values())
-    start_pos = Pos(*DIRECTION_PAD[start])
-    end_pos = Pos(*DIRECTION_PAD[finish])
-    solver = Solver(start_pos, end_pos, valid_nodes)
-    solver.single_solution = False
-    solver.search()
-    return solver.get_all_best_paths(start_pos, end_pos)
 
 def solution1(entries):
     result = 0
     for line in entries:
-        keys = get_key_presses(line)
-        a = len(keys)
+        a = get_key_presses(line)
         b = int(line[:-1])
         m = a * b
-        print(f"{line} {keys} {m} = {a}  {b}")
+        print(f"{line} {m} = {a}  {b}")
         result += m
     return result
 
 
 def solution2(entries):
-    return 0
+    result = 0
+    for line in entries:
+        a = get_key_presses(line, level_count=25)
+        b = int(line[:-1])
+        m = a * b
+        print(f"{line} {m} = {a}  {b}")
+        result += m
+    return result
 
 
 def extract_lines(entries):
