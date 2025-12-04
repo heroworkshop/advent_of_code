@@ -101,6 +101,9 @@ class Grid:
         self.border = border
         self.default_val = default_val
 
+    def __str__(self):
+        return self.render()
+
     def in_bounds(self, pos: Pos):
         if pos.x < self.x_bounds.min:
             return False
@@ -162,6 +165,13 @@ class Grid:
             if (x + dx, y + dy) in self.grid
         ]
 
+    def all_surrounding(self, p):
+        x, y = p
+        return [
+            (x + dx, y + dy)
+            for dx, dy in ALL_DIRECTIONS
+            if (x + dx, y + dy) in self.grid
+        ]
 
 def grid_from_lines(lines: str, default_val=" ", transform=lambda x: x) -> Grid:
     result = Grid(default_val=default_val)
