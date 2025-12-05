@@ -22,7 +22,7 @@ def parse(data):
 def part1():
     result = 0
     fresh_str, rows_str = parse(DATA)
-    fresh_range = make_ranges(fresh_str.split("\n"))
+    fresh_range = parse_range(fresh_str.split("\n"))
     for row in rows_str.split("\n"):
         if is_fresh(int(row),  fresh_range):
             result += 1
@@ -38,22 +38,10 @@ def set_from_ranges(lines: list[str]) -> set[int]:
     return result
 
 
-def make_ranges(lines: list[str]) -> list[tuple[int, int]]:
-    result = []
-    for item in lines:
-        start, end = [int(x) for x in item.split("-")]
-        result.append((start, end))
-    return result
-
-def is_fresh(value: int, ranges: list[tuple[int, int]]) -> bool:
-    for start, end in ranges:
-        if start <= value <= end:
-            return True
-    return False
 
 def part2():
     fresh_str, rows_str = parse(DATA)
-    fresh_ranges = make_ranges(fresh_str.split("\n"))
+    fresh_ranges = parse_range(fresh_str.split("\n"))
 
     merged = merge_ranges(fresh_ranges)
     result = sum(
@@ -63,7 +51,16 @@ def part2():
 
     return result
 
-def merge_ranges(ranges: list[tuple[int, int]]) -> list[tuple[int, int]]:
+IntegerRange = tuple[int, int]
+
+def merge_ranges(ranges: list[IntegerRange]) -> list[IntegerRange]:
+    """Merges overlapping or contiguous ranges
+
+    Example:
+    >>> merge_ranges([(3,5), (10,14), (16,20), (12,18)])
+    [(3, 5), (10, 20)]
+
+    """
     if not ranges:
         return []
     # Sort ranges by start value
@@ -80,6 +77,20 @@ def merge_ranges(ranges: list[tuple[int, int]]) -> list[tuple[int, int]]:
             merged.append(current)
 
     return merged
+
+def parse_range(lines: list[str]) -> list[IntegerRange]:
+    """Parses lines like '3-5' into list of (3,5)"""
+    result = []
+    for item in lines:
+        start, end = [int(x) for x in item.split("-")]
+        result.append((start, end))
+    return result
+
+def is_fresh(value: int, ranges: list[tuple[int, int]]) -> bool:
+    for start, end in ranges:
+        if start <= value <= end:
+            return True
+    return False
 
 
 if __name__ == "__main__":

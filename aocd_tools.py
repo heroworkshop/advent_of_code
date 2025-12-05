@@ -245,3 +245,40 @@ def time_report(start_time) -> str:
         s = diff % 60
         return f"{m}m {s}s"
     return f"{diff}s"
+
+IntegerRange = tuple[int, int]
+
+
+def merge_ranges(ranges: list[IntegerRange]) -> list[IntegerRange]:
+    """Merges overlapping or contiguous ranges
+
+    Example:
+    >>> merge_ranges([(3,5), (10,14), (16,20), (12,18)])
+    [(3, 5), (10, 20)]
+
+    """
+    if not ranges:
+        return []
+    # Sort ranges by start value
+    sorted_ranges = sorted(ranges, key=lambda x: x[0])
+    merged = [sorted_ranges[0]]
+
+    for current in sorted_ranges[1:]:
+        last_start, last_end = merged[-1]
+        current_start, current_end = current
+
+        if current_start <= last_end + 1:  # Overlapping or contiguous ranges
+            merged[-1] = (last_start, max(last_end, current_end))
+        else:
+            merged.append(current)
+
+    return merged
+
+
+def parse_range(lines: list[str]) -> list[IntegerRange]:
+    """Parses lines like '3-5' into list of (3,5)"""
+    result = []
+    for item in lines:
+        start, end = [int(x) for x in item.split("-")]
+        result.append((start, end))
+    return result
