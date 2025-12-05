@@ -165,6 +165,15 @@ class Grid:
             if (x + dx, y + dy) in self.grid
         ]
 
+    def all_empty_neighbours(self, p):
+        x, y = p
+        return [
+            (x + dx, y + dy)
+            for dx, dy in NEIGHBOURS
+            if (x + dx, y + dy) not in self.grid and self.in_bounds(Pos(x + dx, y + dy))
+        ]
+
+
     def all_surrounding(self, p):
         x, y = p
         return [
