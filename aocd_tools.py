@@ -211,7 +211,7 @@ class Grid4d(Grid):
         for y in range(self.y_bounds.min, self.y_bounds.max + 1):
             for x in range(self.x_bounds.min, self.x_bounds.max + 1):
                 p = (x, y, z, w)
-                if p in self.grid():
+                if p in self.grid:
                     ch = self.grid[(x, y, z, w)]
                 else:
                     ch = empty
