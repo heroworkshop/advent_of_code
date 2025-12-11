@@ -13,7 +13,8 @@ EXAMPLE = """
 
 class Machine(NamedTuple):
     lights: int
-    buttons: int
+    buttons: tuple[int, ...]
+    button_sets: tuple[set[int]]
     joltage_req: tuple[int, ...]
 
 def parse(data):
@@ -23,8 +24,9 @@ def parse(data):
         parts = line.split()
         lights = make_lights(parts[0][1:-1])
         joltage_req = tuple(int(x) for x in parts[-1][1:-1].split(","))
-        buttons = [make_buttons(x) for x in parts[1:-1]]
-        machine = Machine(lights, buttons, joltage_req)
+        buttons = tuple(make_buttons(x) for x in parts[1:-1])
+        button_sets = tuple(make_buttons_set(x) for x in parts[1:-1])
+        machine = Machine(lights, buttons, button_sets, joltage_req)
         machines.append(machine)
     return machines
 
@@ -45,11 +47,17 @@ def make_buttons(s):
     return result
 
 
+def make_buttons_set(s):
+    b = eval(s)
+    if isinstance(b, int):
+        b = (b,)
+    return set(b)
+
+
 class LightsSolver(dijkstra.Dijkstra):
     def __init__(self, buttons, destination: int) -> None:
         self.destination = destination
         super().__init__(initial_state=0)
-        self.state = 0
         self.buttons = buttons
 
     def is_win(self, state) -> bool:
@@ -59,16 +67,16 @@ class LightsSolver(dijkstra.Dijkstra):
         moves = []
         for button in self.buttons:
             cost = 1
-            new_state = self.state ^ button
-            print(f"{state} + {button} -> {new_state}")
+            new_state = state ^ button
+            # print(f"{state} + {button} -> {new_state}")
             moves.append(dijkstra.Step(cost=cost, state=new_state))
         return moves
 
-    def report(self) -> None:
-        print(self.visited, "\n", self.nodes)
+    # def report(self) -> None:
+    #     print(self.visited, "\n", self.nodes)
 
 def part1():
-    machines = parse(EXAMPLE)
+    machines = parse(DATA)
     results = []
     for machine in machines:
         solver = LightsSolver(machine.buttons, destination=machine.lights)
@@ -77,11 +85,67 @@ def part1():
     return sum(results)
 
 
+class JoltSolver(dijkstra.Dijkstra):
+    def __init__(self, buttons, destination: tuple[int, ...], initial_joltage) -> None:
+        self.destination = destination
+        super().__init__(initial_state=initial_joltage)
+        self.buttons = buttons
+
+    def is_win(self, state) -> bool:
+        return state == self.destination
+
+    def valid_moves(self, state) -> list[dijkstra.Step]:
+        moves = []
+        for button in self.buttons:
+            cost = 1
+            new_state = tuple(x + int(i in button) for i, x in enumerate(state))
+            if any(a < b for a, b in zip(self.destination, new_state)):
+                continue
+            # print(f"{state} + {button} -> {new_state}")
+            moves.append(dijkstra.Step(cost=cost, state=new_state))
+        return moves
+
+
 def part2():
-    result = 0
-    return result
+    machines = parse(DATA)
+    results = []
+    for machine in machines:
+        joltage, buttons, pre_count = trim(machine)
+        solver = JoltSolver(buttons, destination=machine.joltage_req, initial_joltage=tuple(joltage))
+        best_cost = solver.search()
+        # path = solver.get_best_path(tuple(joltage), machine.joltage_req)
+        # print(path)
+        print(best_cost)
+        results.append(best_cost + pre_count)
+    return sum(results)
+
+def trim(machine: Machine):
+    joltage = [0] * len(machine.joltage_req)
+    buttons = list(machine.button_sets)
+    moves = 0
+    print(buttons)
+    finished = False
+    while not finished:
+        for i, button in enumerate(buttons):
+            unique = button.copy()
+            for j, sub_b in enumerate(buttons):
+                if j == i:
+                    continue
+                unique -= sub_b
+            if unique:
+                for n in unique:  # probably only one but just get one
+                    break
+                presses = machine.joltage_req[n] - joltage[n]
+                moves += presses
+                for n in button:
+                    joltage[n] += presses
+                del buttons[i]
+                break
+        else:
+            finished = True
+    return joltage, buttons, moves
 
 
 if __name__ == "__main__":
-    print("part1:", part1())
+    # print("part1:", part1())
     print("part2:", part2())
