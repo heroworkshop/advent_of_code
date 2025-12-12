@@ -72,11 +72,11 @@ def part2():
         node, _, connections = row.partition(":")
         nodes[node] = connections.split()
     print(nodes)
-    paths = find_all_possible_paths2(nodes, "svr", "out")
-    pprint(paths)
+    to_fft = find_all_possible_paths2(nodes, "svr", "fft")
+    pprint(to_fft)
 
-    valid_paths = [path for path in paths if "fft" in path and "dac" in path]
-    return len(valid_paths)
+
+    return len(to_fft)
 
 def find_all_possible_paths2(nodes, start, finish):
     paths = []
@@ -85,8 +85,10 @@ def find_all_possible_paths2(nodes, start, finish):
     queue.append((start, {start}))
     print(queue)
     while queue:
-        node = queue.popleft()
-        if node[0] == finish:
+        node = queue.pop()
+        if node[0] == "out" and node[0] != finish:
+            continue
+        if node[0] == finish or node[0] == "out":
             paths.append(node[1])
             print(node[1])
             continue
@@ -97,5 +99,5 @@ def find_all_possible_paths2(nodes, start, finish):
     return paths
 
 if __name__ == "__main__":
-    print("part1:", part1())
+    # print("part1:", part1())
     print("part2:", part2())
