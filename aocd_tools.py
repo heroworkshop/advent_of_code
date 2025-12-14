@@ -7,6 +7,10 @@ from typing import NamedTuple
 
 from aocd.exceptions import DeadTokenError
 
+class Boundary(NamedTuple):
+    min: int
+    max: int
+
 AOCD_COOKIE_HELP = """
 For getting session cookie see:
 https://github.com/wimglenn/advent-of-code-wim/issues/1
@@ -88,16 +92,17 @@ def int_tuples_from_lines(lines, sep):
             ]
 
 
-def compute_bounds(values, border=1):
-    Boundary = namedtuple("boundary", "min max")
+
+
+def compute_bounds(values, border=1) -> Boundary:
     return Boundary(min(values) - border, max(values) + border)
 
 
 class Grid:
     def __init__(self, border=0, default_val=" "):
         self.grid = {}
-        self.x_bounds = None
-        self.y_bounds = None
+        self.x_bounds: Boundary|None = None
+        self.y_bounds: Boundary|None = None
         self.border = border
         self.default_val = default_val
 
